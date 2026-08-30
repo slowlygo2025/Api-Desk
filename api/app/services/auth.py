@@ -75,9 +75,17 @@ async def require_client(
 
 def _normalize_api_key(raw: str | None) -> str | None:
     key = (raw or "").strip()
-    if not key or key in ("{}", "null", "undefined"):
+    if not key or key.lower() in ("{}", "null", "undefined", "none", "nil"):
         return None
     return key
+
+
+def _is_rapidapi_request(request: Request, settings: Settings) -> bool:
+    if getattr(request.state, "from_rapidapi", False):
+        return True
+    secret = (settings.rapidapi_proxy_secret or "").strip()
+    provided = (request.headers.get("x-rapidapi-proxy-secret") or "").strip()
+    return bool(secret and provided and provided == secret)
 
 
 async def optional_client(
@@ -87,7 +95,7 @@ async def optional_client(
     settings: Settings = Depends(get_settings),
 ) -> ApiClient | None:
     key = _normalize_api_key(x_api_key)
-    from_rapid = getattr(request.state, "from_rapidapi", False)
+    from_rapid = _is_rapidapi_request(request, settings)
     if key:
         client = await get_client_by_key(session, key)
         if client:

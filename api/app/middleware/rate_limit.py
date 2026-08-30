@@ -44,9 +44,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         raw_key = (request.headers.get("x-api-key") or "").strip()
-        # Playground OpenAPI a veces manda placeholder "{}" / vacío
-        api_key = raw_key if raw_key and raw_key not in ("{}", "null", "undefined") else None
-        from_rapid = getattr(request.state, "from_rapidapi", False)
+        # Playground OpenAPI a veces manda placeholder "{}" / vacío / "None"
+        _placeholders = {"{}", "null", "undefined", "none", "nil"}
+        api_key = raw_key if raw_key and raw_key.lower() not in _placeholders else None
+        # No depender solo de request.state (BaseHTTPMiddleware a veces no propaga)
+        secret = (settings.rapidapi_proxy_secret or "").strip()
+        provided_secret = (request.headers.get("x-rapidapi-proxy-secret") or "").strip()
+        from_rapid = bool(
+            getattr(request.state, "from_rapidapi", False)
+            or (secret and provided_secret and provided_secret == secret)
+        )
         plan = Plan.RETAIL.value
         client_id: str | None = None
         identity = f"ip:{request.client.host if request.client else 'unknown'}"
@@ -56,9 +63,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             require_key = False
             plan = Plan.PRO.value
             identity = "rapidapi:hub"
-            if getattr(request.state, "api_plan", None):
+            hub_plan = getattr(request.state, "api_plan", None) or request.headers.get(
+                "x-rapidapi-subscription"
+            )
+            if hub_plan:
                 # Map rough Hub packs to internal buckets for rate limits
-                sub = str(request.state.api_plan).upper()
+                sub = str(hub_plan).upper()
                 if sub in ("ULTRA", "MEGA"):
                     plan = Plan.INSTITUTIONAL.value
                 elif sub in ("PRO", "BASIC"):
