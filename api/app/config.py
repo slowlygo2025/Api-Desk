@@ -24,6 +24,9 @@ class Settings(BaseSettings):
             url = "postgresql+asyncpg://" + url[len("postgres://") :]
         elif url.startswith("postgresql://") and "+asyncpg" not in url:
             url = "postgresql+asyncpg://" + url[len("postgresql://") :]
+        # Railway Postgres exige TLS; asyncpg usa ssl=require
+        if "+asyncpg" in url and "ssl=" not in url and "localhost" not in url and "127.0.0.1" not in url:
+            url += ("&" if "?" in url else "?") + "ssl=require"
         return url
     redis_url: str = "redis://localhost:6379/0"
     redis_enabled: bool = False
