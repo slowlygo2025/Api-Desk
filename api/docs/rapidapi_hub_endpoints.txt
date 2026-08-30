@@ -1,0 +1,22 @@
+# Endpoints RapidAPI Hub — Opción A
+
+# BASIC ($0) + PRO ($29)
+GET /v1/health
+GET /v1/ready
+GET /v1/chains
+GET /v1/whales
+GET /v1/whales/{id}
+GET /v1/whales/tx/{tx_hash}
+GET /v1/stats/overview
+GET /v1/entities/{address}
+
+# ULTRA ($79) + MEGA ($199) — añadir en Studio solo a estos packs
+GET /v1/stats/timeseries
+GET /v1/market/assets
+GET /v1/market/analysis
+
+# NO publicar en ningún pack:
+# POST /v1/clients
+# POST /v1/whales/ingest/run
+# /v1/admin/*  /v1/ops/*  /v1/metrics
+# /v1/alerts/*  /v1/workspaces/*  /v1/ws/*

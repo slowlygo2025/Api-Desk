@@ -1,0 +1,2212 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Api-Desk Whales",
+    "version": "2.0.0",
+    "description": "Multi-chain whale transfer API (threshold ~> USD): live feed, entity labels, risk score and impact estimate. BASIC/PRO: core whale+stats. ULTRA/MEGA: + timeseries and market analysis. Not a generic price/honeypot aggregator."
+  },
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Health",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ready": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Ready",
+        "operationId": "ready",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/chains": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "List chains",
+        "operationId": "listChains",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChainCoverageOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/whales": {
+      "get": {
+        "tags": [
+          "whales"
+        ],
+        "summary": "List whales",
+        "operationId": "listWhales",
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Asset"
+            }
+          },
+          {
+            "name": "chain",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Chain"
+            }
+          },
+          {
+            "name": "flow_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Flow Type"
+            }
+          },
+          {
+            "name": "min_usd",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Usd"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhaleListOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/whales/tx/{tx_hash}": {
+      "get": {
+        "tags": [
+          "whales"
+        ],
+        "summary": "Get whale by tx",
+        "operationId": "getWhaleByTx",
+        "parameters": [
+          {
+            "name": "tx_hash",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tx Hash"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WhaleEventOut"
+                  },
+                  "title": "Response Get By Tx V1 Whales Tx  Tx Hash  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/whales/{whale_id}": {
+      "get": {
+        "tags": [
+          "whales"
+        ],
+        "summary": "Get whale by id",
+        "operationId": "getWhale",
+        "parameters": [
+          {
+            "name": "whale_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Whale Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhaleEventOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/stats/overview": {
+      "get": {
+        "tags": [
+          "whales"
+        ],
+        "summary": "Stats overview",
+        "operationId": "statsOverview",
+        "parameters": [
+          {
+            "name": "window",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "24h",
+              "title": "Window"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsOverviewOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/stats/timeseries": {
+      "get": {
+        "tags": [
+          "whales"
+        ],
+        "summary": "Stats timeseries",
+        "operationId": "statsTimeseries",
+        "parameters": [
+          {
+            "name": "window",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "24h",
+              "title": "Window"
+            }
+          },
+          {
+            "name": "bucket",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "1h",
+              "title": "Bucket"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeseriesOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entities/{address}": {
+      "get": {
+        "tags": [
+          "whales"
+        ],
+        "summary": "Get entity",
+        "operationId": "getEntity",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Address"
+            }
+          },
+          {
+            "name": "chain",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ethereum",
+              "title": "Chain"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/market/assets": {
+      "get": {
+        "tags": [
+          "market-signals"
+        ],
+        "summary": "Market assets",
+        "operationId": "marketAssets",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/market/analysis": {
+      "get": {
+        "tags": [
+          "market-signals"
+        ],
+        "summary": "Market analysis",
+        "operationId": "marketAnalysis",
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "BTC",
+              "title": "Asset"
+            }
+          },
+          {
+            "name": "persist",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Persist"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketAnalysisOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddressParty": {
+        "properties": {
+          "address": {
+            "type": "string",
+            "title": "Address"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "default": "unknown"
+          },
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type",
+            "default": "unknown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "address"
+        ],
+        "title": "AddressParty"
+      },
+      "AdminClientOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "plan": {
+            "type": "string",
+            "title": "Plan"
+          },
+          "api_key_prefix": {
+            "type": "string",
+            "title": "Api Key Prefix"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "webhook_configured": {
+            "type": "boolean",
+            "title": "Webhook Configured"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "plan",
+          "api_key_prefix",
+          "is_active",
+          "webhook_configured",
+          "created_at"
+        ],
+        "title": "AdminClientOut"
+      },
+      "AlertDeliveryOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          },
+          "rule_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Name"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "whale_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whale Id"
+          },
+          "market_signal_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Market Signal Id"
+          },
+          "dedup_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dedup Key"
+          },
+          "response": {
+            "type": "object",
+            "title": "Response"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "rule_id",
+          "channel",
+          "status",
+          "created_at"
+        ],
+        "title": "AlertDeliveryOut"
+      },
+      "AlertRuleIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "min_usd": {
+            "type": "number",
+            "title": "Min Usd",
+            "default": 10000000
+          },
+          "assets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assets"
+          },
+          "chains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Chains"
+          },
+          "flow_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Flow Types"
+          },
+          "min_risk_level": {
+            "type": "string",
+            "title": "Min Risk Level",
+            "default": "low"
+          },
+          "channels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Channels"
+          },
+          "destination": {
+            "type": "object",
+            "title": "Destination"
+          },
+          "alert_kinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Alert Kinds"
+          },
+          "min_market_stress": {
+            "type": "number",
+            "title": "Min Market Stress",
+            "default": 0.45
+          },
+          "signal_assets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Signal Assets"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "AlertRuleIn"
+      },
+      "AlertRuleOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "min_usd": {
+            "type": "number",
+            "title": "Min Usd",
+            "default": 10000000
+          },
+          "assets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Assets"
+          },
+          "chains": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Chains"
+          },
+          "flow_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Flow Types"
+          },
+          "min_risk_level": {
+            "type": "string",
+            "title": "Min Risk Level",
+            "default": "low"
+          },
+          "channels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Channels"
+          },
+          "destination": {
+            "type": "object",
+            "title": "Destination"
+          },
+          "alert_kinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Alert Kinds"
+          },
+          "min_market_stress": {
+            "type": "number",
+            "title": "Min Market Stress",
+            "default": 0.45
+          },
+          "signal_assets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Signal Assets"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "client_id"
+        ],
+        "title": "AlertRuleOut"
+      },
+      "ChainCoverageOut": {
+        "properties": {
+          "chains": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Chains"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "chains",
+          "total"
+        ],
+        "title": "ChainCoverageOut"
+      },
+      "ClientCreateIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "plan": {
+            "type": "string",
+            "title": "Plan",
+            "default": "retail"
+          },
+          "webhook_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webhook Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ClientCreateIn"
+      },
+      "ClientCreateOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "plan": {
+            "type": "string",
+            "title": "Plan"
+          },
+          "api_key": {
+            "type": "string",
+            "title": "Api Key"
+          },
+          "webhook_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webhook Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "plan",
+          "api_key"
+        ],
+        "title": "ClientCreateOut"
+      },
+      "ClientMeOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "plan": {
+            "type": "string",
+            "title": "Plan"
+          },
+          "api_key_prefix": {
+            "type": "string",
+            "title": "Api Key Prefix"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes"
+          },
+          "rate_limit_per_min": {
+            "type": "integer",
+            "title": "Rate Limit Per Min"
+          },
+          "daily_quota": {
+            "type": "integer",
+            "title": "Daily Quota"
+          },
+          "daily_usage": {
+            "type": "integer",
+            "title": "Daily Usage"
+          },
+          "webhook_configured": {
+            "type": "boolean",
+            "title": "Webhook Configured"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "plan",
+          "api_key_prefix",
+          "scopes",
+          "rate_limit_per_min",
+          "daily_quota",
+          "daily_usage",
+          "webhook_configured",
+          "created_at"
+        ],
+        "title": "ClientMeOut"
+      },
+      "EntityListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EntityOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "EntityListOut"
+      },
+      "EntityOut": {
+        "properties": {
+          "address": {
+            "type": "string",
+            "title": "Address"
+          },
+          "chain": {
+            "type": "string",
+            "title": "Chain"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "meta": {
+            "type": "object",
+            "title": "Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "address",
+          "chain",
+          "label",
+          "entity_type",
+          "confidence"
+        ],
+        "title": "EntityOut"
+      },
+      "FlowSankeyOut": {
+        "properties": {
+          "window": {
+            "type": "string",
+            "title": "Window"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/SankeyNode"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/SankeyLink"
+            },
+            "type": "array",
+            "title": "Links"
+          }
+        },
+        "type": "object",
+        "required": [
+          "window",
+          "nodes",
+          "links"
+        ],
+        "title": "FlowSankeyOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "app": {
+            "type": "string",
+            "title": "App"
+          },
+          "env": {
+            "type": "string",
+            "title": "Env"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "app",
+          "env"
+        ],
+        "title": "HealthOut"
+      },
+      "ImpactInfo": {
+        "properties": {
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "horizon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Horizon"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "details": {
+            "type": "object",
+            "title": "Details"
+          }
+        },
+        "type": "object",
+        "title": "ImpactInfo"
+      },
+      "MarketAnalysisOut": {
+        "properties": {
+          "asset": {
+            "type": "string",
+            "title": "Asset"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind",
+            "default": "market_microstructure"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "mid_price": {
+            "type": "number",
+            "title": "Mid Price"
+          },
+          "stress_score": {
+            "type": "number",
+            "title": "Stress Score"
+          },
+          "spillover_hint": {
+            "type": "number",
+            "title": "Spillover Hint"
+          },
+          "regime": {
+            "type": "string",
+            "title": "Regime"
+          },
+          "components": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Components"
+          },
+          "book_summary": {
+            "type": "object",
+            "title": "Book Summary"
+          },
+          "volume_summary": {
+            "type": "object",
+            "title": "Volume Summary"
+          },
+          "trades_summary": {
+            "type": "object",
+            "title": "Trades Summary"
+          },
+          "venues_summary": {
+            "type": "object",
+            "title": "Venues Summary"
+          },
+          "cross_exchange": {
+            "type": "object",
+            "title": "Cross Exchange"
+          },
+          "signals": {
+            "items": {
+              "$ref": "#/components/schemas/MarketSignalOut"
+            },
+            "type": "array",
+            "title": "Signals"
+          },
+          "fetched_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fetched At"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": "Se\u00f1ales auxiliares para an\u00e1lisis. No sustituyen detecci\u00f3n de whales."
+          }
+        },
+        "type": "object",
+        "required": [
+          "asset",
+          "source",
+          "mid_price",
+          "stress_score",
+          "spillover_hint",
+          "regime",
+          "components",
+          "book_summary",
+          "volume_summary",
+          "trades_summary",
+          "venues_summary",
+          "cross_exchange",
+          "signals",
+          "fetched_at"
+        ],
+        "title": "MarketAnalysisOut"
+      },
+      "MarketBookLevelOut": {
+        "properties": {
+          "price": {
+            "type": "number",
+            "title": "Price"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          }
+        },
+        "type": "object",
+        "required": [
+          "price",
+          "amount"
+        ],
+        "title": "MarketBookLevelOut"
+      },
+      "MarketCandleOut": {
+        "properties": {
+          "exchange": {
+            "type": "string",
+            "title": "Exchange"
+          },
+          "pair": {
+            "type": "string",
+            "title": "Pair"
+          },
+          "asset": {
+            "type": "string",
+            "title": "Asset"
+          },
+          "interval": {
+            "type": "string",
+            "title": "Interval"
+          },
+          "open_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Open Time"
+          },
+          "open": {
+            "type": "number",
+            "title": "Open"
+          },
+          "high": {
+            "type": "number",
+            "title": "High"
+          },
+          "low": {
+            "type": "number",
+            "title": "Low"
+          },
+          "close": {
+            "type": "number",
+            "title": "Close"
+          },
+          "volume": {
+            "type": "number",
+            "title": "Volume"
+          },
+          "quote_volume": {
+            "type": "number",
+            "title": "Quote Volume"
+          }
+        },
+        "type": "object",
+        "required": [
+          "exchange",
+          "pair",
+          "asset",
+          "interval",
+          "open_time",
+          "open",
+          "high",
+          "low",
+          "close",
+          "volume",
+          "quote_volume"
+        ],
+        "title": "MarketCandleOut"
+      },
+      "MarketOrderBookOut": {
+        "properties": {
+          "exchange": {
+            "type": "string",
+            "title": "Exchange"
+          },
+          "pair": {
+            "type": "string",
+            "title": "Pair"
+          },
+          "asset": {
+            "type": "string",
+            "title": "Asset"
+          },
+          "mid": {
+            "type": "number",
+            "title": "Mid"
+          },
+          "spread_bps": {
+            "type": "number",
+            "title": "Spread Bps"
+          },
+          "bid_depth_usd": {
+            "type": "number",
+            "title": "Bid Depth Usd"
+          },
+          "ask_depth_usd": {
+            "type": "number",
+            "title": "Ask Depth Usd"
+          },
+          "imbalance": {
+            "type": "number",
+            "title": "Imbalance"
+          },
+          "bids": {
+            "items": {
+              "$ref": "#/components/schemas/MarketBookLevelOut"
+            },
+            "type": "array",
+            "title": "Bids"
+          },
+          "asks": {
+            "items": {
+              "$ref": "#/components/schemas/MarketBookLevelOut"
+            },
+            "type": "array",
+            "title": "Asks"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "exchange",
+          "pair",
+          "asset",
+          "mid",
+          "spread_bps",
+          "bid_depth_usd",
+          "ask_depth_usd",
+          "imbalance",
+          "bids",
+          "asks",
+          "ts"
+        ],
+        "title": "MarketOrderBookOut"
+      },
+      "MarketSignalOut": {
+        "properties": {
+          "signal_type": {
+            "type": "string",
+            "title": "Signal Type"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": "global"
+          },
+          "detail": {
+            "type": "object",
+            "title": "Detail"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "signal_type",
+          "severity",
+          "score",
+          "title",
+          "ts"
+        ],
+        "title": "MarketSignalOut"
+      },
+      "MarketSnapshotOut": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind",
+            "default": "market_microstructure"
+          },
+          "asset": {
+            "type": "string",
+            "title": "Asset"
+          },
+          "fetched_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fetched At"
+          },
+          "venues_ok": {
+            "type": "integer",
+            "title": "Venues Ok"
+          },
+          "venues_total": {
+            "type": "integer",
+            "title": "Venues Total"
+          },
+          "venues": {
+            "items": {
+              "$ref": "#/components/schemas/MarketVenueStatusOut"
+            },
+            "type": "array",
+            "title": "Venues"
+          },
+          "meta": {
+            "type": "object",
+            "title": "Meta"
+          },
+          "trades": {
+            "items": {
+              "$ref": "#/components/schemas/MarketTradeOut"
+            },
+            "type": "array",
+            "title": "Trades"
+          },
+          "books": {
+            "items": {
+              "$ref": "#/components/schemas/MarketOrderBookOut"
+            },
+            "type": "array",
+            "title": "Books"
+          },
+          "candles_by_exchange": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/MarketCandleOut"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Candles By Exchange"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": "Capa auxiliar de se\u00f1ales CEX (trades/book/volumen). El producto principal son whales on-chain."
+          }
+        },
+        "type": "object",
+        "required": [
+          "asset",
+          "fetched_at",
+          "venues_ok",
+          "venues_total",
+          "venues",
+          "meta",
+          "trades",
+          "books",
+          "candles_by_exchange"
+        ],
+        "title": "MarketSnapshotOut"
+      },
+      "MarketTradeOut": {
+        "properties": {
+          "exchange": {
+            "type": "string",
+            "title": "Exchange"
+          },
+          "pair": {
+            "type": "string",
+            "title": "Pair"
+          },
+          "asset": {
+            "type": "string",
+            "title": "Asset"
+          },
+          "price": {
+            "type": "number",
+            "title": "Price"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "notional_usd": {
+            "type": "number",
+            "title": "Notional Usd"
+          },
+          "side": {
+            "type": "string",
+            "title": "Side"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          },
+          "trade_id": {
+            "type": "string",
+            "title": "Trade Id",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "exchange",
+          "pair",
+          "asset",
+          "price",
+          "amount",
+          "notional_usd",
+          "side",
+          "ts"
+        ],
+        "title": "MarketTradeOut"
+      },
+      "MarketVenueStatusOut": {
+        "properties": {
+          "exchange": {
+            "type": "string",
+            "title": "Exchange"
+          },
+          "pair": {
+            "type": "string",
+            "title": "Pair"
+          },
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "trades": {
+            "type": "integer",
+            "title": "Trades",
+            "default": 0
+          },
+          "latency_ms": {
+            "type": "number",
+            "title": "Latency Ms",
+            "default": 0.0
+          },
+          "mid": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "exchange",
+          "pair",
+          "ok"
+        ],
+        "title": "MarketVenueStatusOut"
+      },
+      "ReadyOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "database": {
+            "type": "boolean",
+            "title": "Database"
+          },
+          "providers_healthy": {
+            "type": "integer",
+            "title": "Providers Healthy"
+          },
+          "providers_total": {
+            "type": "integer",
+            "title": "Providers Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "database",
+          "providers_healthy",
+          "providers_total"
+        ],
+        "title": "ReadyOut"
+      },
+      "RiskInfo": {
+        "properties": {
+          "score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "factors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Factors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "score",
+          "level"
+        ],
+        "title": "RiskInfo"
+      },
+      "SankeyLink": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "target",
+          "value",
+          "count"
+        ],
+        "title": "SankeyLink"
+      },
+      "SankeyNode": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type",
+            "default": "unknown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "SankeyNode"
+      },
+      "StatsOverviewOut": {
+        "properties": {
+          "window": {
+            "type": "string",
+            "title": "Window"
+          },
+          "total_events": {
+            "type": "integer",
+            "title": "Total Events"
+          },
+          "total_volume_usd": {
+            "type": "number",
+            "title": "Total Volume Usd"
+          },
+          "by_asset": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Asset"
+          },
+          "by_flow_type": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Flow Type"
+          },
+          "by_chain": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Chain"
+          },
+          "high_risk_count": {
+            "type": "integer",
+            "title": "High Risk Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "window",
+          "total_events",
+          "total_volume_usd",
+          "by_asset",
+          "by_flow_type",
+          "by_chain",
+          "high_risk_count"
+        ],
+        "title": "StatsOverviewOut"
+      },
+      "TimeseriesBucket": {
+        "properties": {
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ts"
+          },
+          "events": {
+            "type": "integer",
+            "title": "Events"
+          },
+          "volume_usd": {
+            "type": "number",
+            "title": "Volume Usd"
+          },
+          "high_risk": {
+            "type": "integer",
+            "title": "High Risk"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ts",
+          "events",
+          "volume_usd",
+          "high_risk"
+        ],
+        "title": "TimeseriesBucket"
+      },
+      "TimeseriesOut": {
+        "properties": {
+          "window": {
+            "type": "string",
+            "title": "Window"
+          },
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          },
+          "buckets": {
+            "items": {
+              "$ref": "#/components/schemas/TimeseriesBucket"
+            },
+            "type": "array",
+            "title": "Buckets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "window",
+          "bucket",
+          "buckets"
+        ],
+        "title": "TimeseriesOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WhaleEventOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "tx_hash": {
+            "type": "string",
+            "title": "Tx Hash"
+          },
+          "asset": {
+            "type": "string",
+            "title": "Asset"
+          },
+          "chain": {
+            "type": "string",
+            "title": "Chain"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "amount_usd": {
+            "type": "number",
+            "title": "Amount Usd"
+          },
+          "from": {
+            "$ref": "#/components/schemas/AddressParty"
+          },
+          "to": {
+            "$ref": "#/components/schemas/AddressParty"
+          },
+          "flow_type": {
+            "type": "string",
+            "title": "Flow Type"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/RiskInfo"
+          },
+          "impact": {
+            "$ref": "#/components/schemas/ImpactInfo"
+          },
+          "detected_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Detected At"
+          },
+          "block_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Block Time"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "tx_hash",
+          "asset",
+          "chain",
+          "amount",
+          "amount_usd",
+          "from",
+          "to",
+          "flow_type",
+          "risk",
+          "impact",
+          "detected_at",
+          "provider"
+        ],
+        "title": "WhaleEventOut"
+      },
+      "WhaleListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WhaleEventOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "count"
+        ],
+        "title": "WhaleListOut"
+      },
+      "WorkspaceIn": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "config": {
+            "type": "object",
+            "title": "Config"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "WorkspaceIn"
+      },
+      "WorkspaceOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "config": {
+            "type": "object",
+            "title": "Config"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default",
+            "default": false
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "client_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "WorkspaceOut"
+      },
+      "WsTicketOut": {
+        "properties": {
+          "ticket": {
+            "type": "string",
+            "title": "Ticket"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ticket",
+          "expires_in"
+        ],
+        "title": "WsTicketOut"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://REPLACE_WITH_PUBLIC_API_HOST",
+      "description": "Production HTTPS (set after R3 deploy)"
+    }
+  ]
+}
