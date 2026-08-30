@@ -139,7 +139,7 @@ async def stats_timeseries(
     window: str = Query(default="24h"),
     bucket: str = Query(default="1h"),
     session: AsyncSession = Depends(get_db),
-    _client=Depends(require_scope("stats.timeseries")),
+    _client=Depends(optional_client),
 ):
     since = _window_since(window)
     rows = (
