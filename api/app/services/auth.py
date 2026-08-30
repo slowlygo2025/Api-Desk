@@ -73,15 +73,30 @@ async def require_client(
     return client
 
 
+def _normalize_api_key(raw: str | None) -> str | None:
+    key = (raw or "").strip()
+    if not key or key in ("{}", "null", "undefined"):
+        return None
+    return key
+
+
 async def optional_client(
     request: Request,
     x_api_key: Annotated[str | None, Header()] = None,
     session: AsyncSession = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> ApiClient | None:
-    if x_api_key:
-        return await require_client(x_api_key=x_api_key, session=session)
-    if getattr(request.state, "from_rapidapi", False):
+    key = _normalize_api_key(x_api_key)
+    from_rapid = getattr(request.state, "from_rapidapi", False)
+    if key:
+        client = await get_client_by_key(session, key)
+        if client:
+            return client
+        if from_rapid:
+            # Hub playground a menudo manda placeholder; RapidAPI ya autentica
+            return None
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
+    if from_rapid:
         return None
     if not settings.effective_require_api_key:
         return None

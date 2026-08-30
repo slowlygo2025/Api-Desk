@@ -43,13 +43,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if request.method == "OPTIONS" or path.endswith("/health") or path.endswith("/metrics") or "/ws/" in path:
             return await call_next(request)
 
-        api_key = request.headers.get("x-api-key")
+        raw_key = (request.headers.get("x-api-key") or "").strip()
+        # Playground OpenAPI a veces manda placeholder "{}" / vacío
+        api_key = raw_key if raw_key and raw_key not in ("{}", "null", "undefined") else None
+        from_rapid = getattr(request.state, "from_rapidapi", False)
         plan = Plan.RETAIL.value
         client_id: str | None = None
         identity = f"ip:{request.client.host if request.client else 'unknown'}"
 
         require_key = settings.effective_require_api_key
-        if getattr(request.state, "from_rapidapi", False):
+        if from_rapid:
             require_key = False
             plan = Plan.PRO.value
             identity = "rapidapi:hub"
@@ -73,35 +76,40 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             async with SessionLocal() as session:
                 client = await get_client_by_key(session, api_key)
                 if not client:
-                    return JSONResponse(status_code=401, content={"detail": "Invalid API key"})
-                plan = client.plan
-                client_id = client.id
-                identity = f"client:{client.id}"
-
-                # daily quota
-                day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-                usage = (
-                    await session.execute(
-                        select(UsageDaily).where(UsageDaily.client_id == client.id, UsageDaily.day == day)
-                    )
-                ).scalar_one_or_none()
-                quota = daily_quota_for_plan(settings, plan)
-                used = usage.request_count if usage else 0
-                if used >= quota:
-                    metrics.inc("apidesk_quota_exceeded_total", plan=plan)
-                    return JSONResponse(
-                        status_code=429,
-                        content={"detail": "Daily quota exceeded", "plan": plan, "quota": quota},
-                    )
-                if usage:
-                    usage.request_count += 1
+                    # Tráfico Hub: ignorar X-API-Key basura del playground; RapidAPI ya autentica
+                    if from_rapid:
+                        request.state.api_plan = plan
+                    else:
+                        return JSONResponse(status_code=401, content={"detail": "Invalid API key"})
                 else:
-                    session.add(UsageDaily(client_id=client.id, day=day, request_count=1))
-                await session.commit()
-                request.state.api_client_id = client_id
-                request.state.api_plan = plan
+                    plan = client.plan
+                    client_id = client.id
+                    identity = f"client:{client.id}"
 
-        elif getattr(request.state, "from_rapidapi", False):
+                    # daily quota
+                    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                    usage = (
+                        await session.execute(
+                            select(UsageDaily).where(UsageDaily.client_id == client.id, UsageDaily.day == day)
+                        )
+                    ).scalar_one_or_none()
+                    quota = daily_quota_for_plan(settings, plan)
+                    used = usage.request_count if usage else 0
+                    if used >= quota:
+                        metrics.inc("apidesk_quota_exceeded_total", plan=plan)
+                        return JSONResponse(
+                            status_code=429,
+                            content={"detail": "Daily quota exceeded", "plan": plan, "quota": quota},
+                        )
+                    if usage:
+                        usage.request_count += 1
+                    else:
+                        session.add(UsageDaily(client_id=client.id, day=day, request_count=1))
+                    await session.commit()
+                    request.state.api_client_id = client_id
+                    request.state.api_plan = plan
+
+        elif from_rapid:
             request.state.api_plan = plan
         elif settings.app_env == "development":
             plan = Plan.PRO.value

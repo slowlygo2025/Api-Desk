@@ -168,22 +168,6 @@
               "default": 50,
               "title": "Limit"
             }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
           }
         ],
         "responses": {
@@ -225,22 +209,6 @@
             "schema": {
               "type": "string",
               "title": "Tx Hash"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
             }
           }
         ],
@@ -288,22 +256,6 @@
               "type": "string",
               "title": "Whale Id"
             }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
           }
         ],
         "responses": {
@@ -346,22 +298,6 @@
               "type": "string",
               "default": "24h",
               "title": "Window"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
             }
           }
         ],
@@ -416,22 +352,6 @@
               "default": "1h",
               "title": "Bucket"
             }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
           }
         ],
         "responses": {
@@ -484,22 +404,6 @@
               "default": "ethereum",
               "title": "Chain"
             }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
           }
         ],
         "responses": {
@@ -533,24 +437,6 @@
         ],
         "summary": "Market assets",
         "operationId": "marketAssets",
-        "parameters": [
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -599,22 +485,6 @@
               "type": "boolean",
               "default": true,
               "title": "Persist"
-            }
-          },
-          {
-            "name": "x-api-key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Api-Key"
             }
           }
         ],
@@ -1352,7 +1222,7 @@
           "note": {
             "type": "string",
             "title": "Note",
-            "default": "Se\u00f1ales auxiliares para an\u00e1lisis. No sustituyen detecci\u00f3n de whales."
+            "default": "Señales auxiliares para análisis. No sustituyen detección de whales."
           }
         },
         "type": "object",
@@ -1631,7 +1501,7 @@
           "note": {
             "type": "string",
             "title": "Note",
-            "default": "Capa auxiliar de se\u00f1ales CEX (trades/book/volumen). El producto principal son whales on-chain."
+            "default": "Capa auxiliar de señales CEX (trades/book/volumen). El producto principal son whales on-chain."
           }
         },
         "type": "object",
