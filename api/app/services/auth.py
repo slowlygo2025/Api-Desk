@@ -6,7 +6,7 @@ import hashlib
 import secrets
 from typing import Annotated
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -74,12 +74,15 @@ async def require_client(
 
 
 async def optional_client(
+    request: Request,
     x_api_key: Annotated[str | None, Header()] = None,
     session: AsyncSession = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> ApiClient | None:
     if x_api_key:
         return await require_client(x_api_key=x_api_key, session=session)
+    if getattr(request.state, "from_rapidapi", False):
+        return None
     if not settings.effective_require_api_key:
         return None
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing X-API-Key")

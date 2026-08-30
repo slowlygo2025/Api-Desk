@@ -87,6 +87,10 @@ class RapidApiProxyMiddleware(BaseHTTPMiddleware):
 
         # Tráfico autenticado como RapidAPI → aplicar whitelist del Hub
         from_rapid = provided == secret
+        if from_rapid:
+            request.state.from_rapidapi = True
+            # RapidAPI facture/quotas; no exigimos X-API-Key propia en Hub
+            request.state.api_plan = request.headers.get("x-rapidapi-subscription") or "BASIC"
         if from_rapid and settings.rapidapi_hub_only and not is_hub_allowed(request.method, path):
             return JSONResponse(
                 status_code=403,

@@ -49,6 +49,17 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         identity = f"ip:{request.client.host if request.client else 'unknown'}"
 
         require_key = settings.effective_require_api_key
+        if getattr(request.state, "from_rapidapi", False):
+            require_key = False
+            plan = Plan.PRO.value
+            identity = "rapidapi:hub"
+            if getattr(request.state, "api_plan", None):
+                # Map rough Hub packs to internal buckets for rate limits
+                sub = str(request.state.api_plan).upper()
+                if sub in ("ULTRA", "MEGA"):
+                    plan = Plan.INSTITUTIONAL.value
+                elif sub in ("PRO", "BASIC"):
+                    plan = Plan.PRO.value if sub == "PRO" else Plan.RETAIL.value
         registration_open = settings.effective_allow_client_registration
         is_public_register = path.rstrip("/").endswith("/clients") and request.method == "POST"
 
@@ -90,6 +101,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 request.state.api_client_id = client_id
                 request.state.api_plan = plan
 
+        elif getattr(request.state, "from_rapidapi", False):
+            request.state.api_plan = plan
         elif settings.app_env == "development":
             plan = Plan.PRO.value
             identity = "dev:anonymous"
